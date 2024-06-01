@@ -125,21 +125,12 @@ class EDN(nn.Module):
         self.X3 = External_attention(channels[2])
         self.X4 = External_attention(channels[3])
 
-        self.Conv1 = new_conv_block(channels[0], channels[0])
-        self.Conv2 = new_conv_block(channels[1], channels[1])
-        self.Conv3 = new_conv_block(channels[2], channels[2])
-        self.Conv4 = new_conv_block(channels[3], channels[3])
-
     def forward(self, x):
         x1 ,x2, x3, x4 = x
         x1 = self.X1(x1)
         x2 = self.X2(x2)
         x3 = self.X3(x3)
         x4 = self.X4(x4)
-        # x1 = self.Conv1(x1)
-        # x2 = self.Conv2(x2)
-        # x3 = self.Conv3(x3)
-        # x4 = self.Conv4(x4)
         return [x1, x2, x3, x4]
 
 class ISTDU_Net(miNet):
@@ -192,84 +183,13 @@ class ISTDU_Net(miNet):
         # return torch.sigmoid(self.head(x))
         return torch.sigmoid(self.headSeg(x)) #torch.sigmoid(self.headDet(x)), 
 
-def conv_relu_bn(in_channel, out_channel, dirate=1):
-    return nn.Sequential(
-        nn.Conv2d(
-            in_channels=in_channel,
-            out_channels=out_channel,
-            kernel_size=3,
-            stride=1,
-            padding=dirate,
-            dilation=dirate,
-        ),
-        nn.BatchNorm2d(out_channel),
-        nn.ReLU(inplace=True),
-    )
-
-
-class new_conv_block(nn.Module):
-    """
-    Convolution Block
-    """
-
-    def __init__(self, in_ch, out_ch):
-        super(new_conv_block, self).__init__()
-        self.conv_layer = nn.Sequential(
-            conv_relu_bn(in_ch, in_ch, 1),
-            conv_relu_bn(in_ch, out_ch, 1),
-            conv_relu_bn(out_ch, out_ch, 1),
-        )
-        self.cdc_layer = nn.Sequential(
-            CDC_conv(in_ch, out_ch), nn.BatchNorm2d(out_ch), nn.ReLU(inplace=True)
-        )
-        self.dconv_layer = nn.Sequential(
-            conv_relu_bn(in_ch, in_ch, 2),
-            conv_relu_bn(in_ch, out_ch, 4),
-            conv_relu_bn(out_ch, out_ch, 2),
-        )
-        self.final_layer = conv_relu_bn(out_ch * 3, out_ch, 1)
-
-    def forward(self, x):
-        conv_out = self.conv_layer(x)
-        cdc_out = self.cdc_layer(x)
-        dconv_out = self.dconv_layer(x)
-        out = torch.concat([conv_out, cdc_out, dconv_out], dim=1)
-        out = self.final_layer(out)
-        return out
-
-class CDC_conv(nn.Module):
-    def __init__(
-        self,
-        in_channels,
-        out_channels,
-        bias=True,
-        kernel_size=3,
-        padding=1,
-        dilation=1,
-        theta=0.7,
-    ):
-        super().__init__()
-        self.conv = nn.Conv2d(
-            in_channels,
-            out_channels,
-            kernel_size=kernel_size,
-            padding=padding,
-            dilation=dilation,
-            bias=bias,
-        )
-        self.theta = theta
-
-    def forward(self, x):
-        norm_out = self.conv(x)
-        [c_out, c_in, kernel_size, kernel_size] = self.conv.weight.shape
-        kernel_diff = self.conv.weight.sum(2).sum(2)
-        kernel_diff = kernel_diff[:, :, None, None]
-        diff_out = F.conv2d(
-            input=x,
-            weight=kernel_diff,
-            bias=self.conv.bias,
-            stride=self.conv.stride,
-            padding=0,
-        )
-        out = norm_out - self.theta * diff_out
-        return out
+if __name__ == '__main__':
+    # x = torch.rand((3,1,256,256))
+    x = torch.rand((3 ,1 ,512, 512))
+    x = x.to('cuda')
+    model = ctNet()
+    model.to('cuda')
+    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print("Total_params: {}".format(pytorch_total_params))
+    out = model(x)
+    print(out.shape)
