@@ -11,7 +11,7 @@ class TrainSetLoader(Dataset):
         self.dataset_dir = dataset_dir + '/' + dataset_name
         self.patch_size = patch_size
         self.size = size
-        with open(self.dataset_dir +'/img_idx/train_' + dataset_name + '.txt', 'r') as f:
+        with open(self.dataset_dir +'/img_idx/train.txt', 'r') as f:
             self.train_list = f.read().splitlines()
         if img_norm_cfg == None:
             self.img_norm_cfg = get_img_norm_cfg(dataset_name, dataset_dir)
@@ -66,7 +66,7 @@ class TestSetLoader(Dataset):
         super(TestSetLoader).__init__()
         self.dataset_dir = dataset_dir + '/' + test_dataset_name
         self.size= size
-        with open(self.dataset_dir + '/img_idx/test_' + test_dataset_name + '.txt', 'r') as f:
+        with open(self.dataset_dir + '/img_idx/test.txt', 'r') as f:
             self.test_list = f.read().splitlines()
         if img_norm_cfg == None:
             self.img_norm_cfg = get_img_norm_cfg(train_dataset_name, dataset_dir)
