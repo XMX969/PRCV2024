@@ -1,5 +1,5 @@
 '''
-CUDA_VISIBLE_DEVICES=4 python test.py --model_name ISTDU-Net --dataset_name Dataset-mask --pth_dirs ISTDU-Net/Adam+size512+oringincp+bs8+512crop+trans/Dataset-mask_ISTDU-Net_100.pth.tar
+CUDA_VISIBLE_DEVICES=1 python test.py --model_name ISTDU-Net --dataset_name Dataset-mask --pth_dirs ISTDU-Net/AdamW+size512+oringincp+bs8+512crop+trans-05639-06330/Dataset-mask_ISTDU-Net_100.pth.tar
 '''
 
 import argparse
@@ -52,6 +52,9 @@ def test():
         ### save img
         if opt.save_img == True:
             img_save = transforms.ToPILImage()((pred[0,0,:,:]).cpu())
+            img_array = np.array(img_save)
+            binary_array = (img_array > 128).astype(np.uint8)
+            img_save = Image.fromarray(binary_array)
             if not os.path.exists(opt.save_img_dir + opt.test_dataset_name + '/' + opt.model_name):
                 os.makedirs(opt.save_img_dir + opt.test_dataset_name + '/' + opt.model_name)
             img_save.save(opt.save_img_dir + opt.test_dataset_name + '/' + opt.model_name + '/' + img_dir[0] + '.png')  
