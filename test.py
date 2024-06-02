@@ -54,7 +54,7 @@ def test():
             img_save = transforms.ToPILImage()((pred[0,0,:,:]).cpu())
             img_array = np.array(img_save)
             binary_array = (img_array > 128).astype(np.uint8)
-            img_save = Image.fromarray(binary_array)
+            img_save = Image.fromarray(binary_array * 255)
             if not os.path.exists(opt.save_img_dir + opt.test_dataset_name + '/' + opt.model_name):
                 os.makedirs(opt.save_img_dir + opt.test_dataset_name + '/' + opt.model_name)
             img_save.save(opt.save_img_dir + opt.test_dataset_name + '/' + opt.model_name + '/' + img_dir[0] + '.png')  
