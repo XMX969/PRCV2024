@@ -89,10 +89,6 @@ if __name__ == '__main__':
         for model_name in opt.model_names:
             for dataset_name in opt.dataset_names:
                 for pth_dir in opt.pth_dirs:
-                    print(dataset_name)
-                    print(pth_dir)
-                    if dataset_name in pth_dir:
-                        print(1)
                     if dataset_name in pth_dir and model_name in pth_dir:
                         opt.test_dataset_name = dataset_name
                         opt.model_name = model_name
